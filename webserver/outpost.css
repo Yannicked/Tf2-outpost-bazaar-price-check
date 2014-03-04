@@ -1,0 +1,102 @@
+.icon_italic:before {
+  	content: "\f033";
+	display: inline-block;
+    	display: block;
+	width: 11px;
+	height: 42px;
+	line-height: 42px;
+	padding: 0 16px;
+	font-size: 10.5pt;
+	text-align: center;
+	color: #4b4542;
+
+}
+.icon_bold:before {
+	border-left: 0;
+  	content: "\f032";
+	display: inline-block;
+	display: block;
+	width: 11px;
+	height: 42px;
+	line-height: 42px;
+	padding: 0 16px;
+	font-size: 10.5pt;
+	text-align: center;
+	color: #4b4542;
+}
+.icon_underline:before {
+  	content: "\f0cd";
+	display: inline-block;
+    	display: block;
+	width: 11px;
+	height: 42px;
+	line-height: 42px;
+	padding: 0 16px;
+	font-size: 10.5pt;
+	text-align: center;
+	color: #4b4542;
+
+}
+.icon_strike:before {
+  	content: "\f0cc";
+	display: inline-block;
+	display: block;
+	width: 11px;
+	height: 42px;
+	line-height: 42px;
+	padding: 0 16px;
+	font-size: 10.5pt;
+	text-align: center;
+	color: #4b4542;
+}
+.icon_bcolor:before{
+	content: "\f043";
+	display: inline-block;
+	display: block;
+	width: 11px;
+	height: 42px;
+	line-height: 42px;
+	padding: 0 16px;
+	font-size: 10.5pt;
+	text-align: center;
+	color: #4b4542;
+}
+.additions_li_left {
+	float: left;
+	border-right: 1px dashed rgba(255,255,255,0.04);
+
+}
+.additions_li_right {
+	float: right;
+	border-left: 1px dashed rgba(255,255,255,0.04);
+}
+.additions_username {
+
+	font-size: 10pt;
+	font: inherit;
+	text-decoration: none;
+	height: 42px;
+	vertical-align: baseline;
+	display:table;
+}
+
+.additions_username_details {
+	font-size: 9.5pt;
+	font-weight: normal;
+	color: #766d68;
+	text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+}
+
+#notes_edit_modal textarea {
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+}
+
+input[type="text"] {
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
+}
+
+.dropdown span {
+	width: 254.1px !important;
+}

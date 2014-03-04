@@ -1,6 +1,6 @@
 // pure prices as of now
 var metal = 0.315;
-var key = 6.125;
+var key = 6.825;
 var bud = 19;
 // initialize a SQLite database
 var db = new sqlite3.Database('tf2Prices.db');
@@ -71,10 +71,10 @@ function parsePrices(body){
 	response = JSON.parse(body)['response'];
 	//prices = response['prices'];
 	timestamp = parseInt(response['current_time']);
-	db.run('CREATE TABLE prices (id integer, quality integer, effect integer, value integer, value_high integer, currency string)', function(err){});
-	db.run('DELETE FROM prices', function(err) {});
-	db.run('CREATE TABLE timestamp (timestamp integer)', function(err){});
-	db.run('DELETE FROM prices', function(err){});
+	db.run('CREATE TABLE prices (id integer, quality integer, effect integer, value integer, value_high integer, currency string)', function(err){extraInfo('sqlite: '+err)});
+	db.run('DELETE FROM prices', function(err) {extraInfo('sqlite: '+err)});
+	db.run('CREATE TABLE timestamp (timestamp integer)', function(err){extraInfo('sqlite: '+err)});
+	db.run('DELETE FROM prices', function(err){extraInfo('sqlite: '+err)});
 	db.run('REPLACE INTO timestamp values(?)', [timestamp]);
 	setTimeout(function(){n.send(body)}, 1000);
 	n.on('message', function(m){
@@ -82,7 +82,8 @@ function parsePrices(body){
 			extraInfo('Parsed downloaded prices!');
 			setPure();
 		} else {
-			extraInfo('Error: '+m)
+			extraInfo('Caught exception: '+m)
 	}
 });
 }
+setPure();

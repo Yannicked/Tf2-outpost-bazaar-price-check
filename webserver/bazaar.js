@@ -1,7 +1,95 @@
 var socket = io.connect('ws://95.47.140.204:2070');
 var steamID = $('.btn.btn-primary.user-btn.hidden-xs').attr('href').replace('/profiles/', '');
-var version = '1.3.2';
-var changelog = 'Welcome to bazaar.tf unusual pricer version '+version+'\nChangelog 1.3.2:\n - fixed: If you navigated away from the page too fast, the script would say that the server was down\n - Added: this popup';
+var version = '1.5.0.1';
+var changelog = 'Welcome to bazaar.tf unusual pricer version '+version+'\nChangelog 1.5.0.1:\n - Fixed server issues';
+var PCsettingsCookie = 'Tf2Price'
+var PCdefaultSettings = {highestBid:false, preview:false};
+var PCsettings = getCookie(PCsettingsCookie);
+
+var previewHTML = '<div id="reply-original-preview" class="replybox form-control trade-comment-reply no-margin" style="overflow: hidden; word-wrap: break-word; resize: horizontal; height:auto; min-height: 54px; width: 944px; margin-top: 10px !important; vertical-align:top"></div>'
+
+console.debugtf2 = function(msg) {
+
+	console.debug('Bazaar.tf additions debug: '+msg);
+
+}
+
+function bbToHtml(input) {
+	var bbTypes =  [
+		/\[b\](.+)\[\/b\]/ig,
+		/\[i\](.+)\[\/i\]/ig,
+		/\[u\](.+)\[\/u\]/ig,
+		/\[s\](.+)\[\/s\]/ig,
+		/\[color\=(#[0-9a-f]{6})\](.+)\[\/color\]/g,
+		/\[spoiler\](.+)\[\/spoiler\]/gi,
+		/\[img\](.+)\[\/img\]/gi,
+		/\[url\=(.+\..+)\](.+)\[\/url\]/gi
+	];
+	
+	var htmlTypes = [
+		'<strong>$1</strong>',
+		'<em>$1</em>',
+		'<span style="text-decoration: underline;">$1</span>',
+		'<del>$1</del>',
+		'<span style="color:$1;">$2</span>',
+		'<span class="spoiler">$1</span>',
+		'<img class="comment-image img-responsive" src="$1"></img>',
+		'<a href="$1">$2</a>'
+	];
+	if (input == undefined) {
+		return input;
+	}
+	for (var i=0; i<bbTypes.length; i++) {
+		input = input.replace(bbTypes[i], htmlTypes[i]);
+	}
+	return input;
+}
+function previewer() {
+	input = $('#reply-original');
+	input.after($(previewHTML));
+	preview = $('#reply-original-preview');
+	preview.hide();
+	var ival;
+	input.focus(function(){
+		preview.slideDown({duration: 'slow', queue:false});
+		//$('#reply-original-preview').parent().animate({height: 'auto'}, "slow", function() {$('#reply-original-preview').parent().css('height', 'auto');});
+		ival = setInterval(function() {
+			if (input.val() == '') {
+				preview.html('Start typing to see the preview...')
+			} else {
+				preview.html(bbToHtml(input.val().replace(/\r\n|\r|\n/g,"<br />")));
+			}
+		}, 10);
+	});
+	$(document).click(function(e) {
+		if( $(e.target).closest("#comments-container").length > 0) {
+        		return true;
+    		}
+		if (preview.is(":hidden")) {
+			return true;
+		}
+	});
+}
+
+if (window.location.pathname.indexOf('settings') > -1) {
+	if (PCsettings == null) {
+		setCookie(PCsettingsCookie, PCdefaultSettings, 666);
+		PCsettings = PCdefaultSettings;
+	}
+	$('.tab-content').append(' <div id="tf2pcbazaar" class="tab-pane fade"> <div class="form-group"> <div class="col-lg-10 col-lg-offset-2" id="tf2pcbazaar-inserter"> <div class="checkbox"><label><input type="checkbox" id="settings-dynamic-auctions" name="dynamic-auctions" value=0> Dynamic Highest-Bids</label></div> <span class="help-block">Dynamically load the highest bid in aucions. (experimental, doesn\'t look that good, working on the looks :P)</span> </div> </div> </div> ');
+	$('#tf2pcbazaar-inserter').append('<div class="checkbox"><label><input type="checkbox" id="settings-input-preview" name="input-preview" value=0> Preview comments</label></div> <span class="help-block">Show a preview while typing a comment on a trade</span>');
+	$('.nav.nav-pills.nav-stacked').append('<li> <a href="#tf2pcbazaar" data-toggle="tab" data-original-title="" title=""> <i class="fa fa-lightbulb-o"></i> Tf2 PC </a> </li> ');
+	$('#settings-dynamic-auctions').prop('checked', PCsettings['highestBid']);
+	$('#settings-input-preview').prop('checked', PCsettings['preview']);
+}
+if (PCsettings) {
+	if (PCsettings['highestBid']) {
+		getHighestBid();
+	}
+	if (PCsettings['preview']) {
+		previewer();
+	}
+}
 
 if (version != getCookie('version')) {
 	alert(changelog);
@@ -69,7 +157,7 @@ function getItemData() {
 		var itemID = $this.attr('i-defindex');
 		var itemQuality = '5';
 		var itemEffect = $this.attr('i-effect');
-		extras = getItemExtras(index);
+		extras = [];//getItemExtras(index);
 		var pc = [itemID, itemQuality, itemEffect];
 		pcSend = {'price':pc, 'index':index, 'extras':extras};
 		socket.emit('pc', JSON.stringify(pcSend));
@@ -88,16 +176,23 @@ function getHighestBid() {
 	$('.auction-info').each(function(index) {
 		link = $('.auction-info').eq(index).parents().eq(3).find('a').attr('href');
 		$.get( link , function( data ) {
-  			$data = $(data);
-			$('.auction-info').eq(index).parents().eq(3).find('.trade-items').append($data.find('.comment.accepted').find('.comment-content').html()+'\n'+$data.find('.comment.accepted').find('.item-list.clearfix').html());
+  			$data = $(data).find('.comment.accepted');
+			if (data.indexOf('comment accepted')>-1) {
+				$icon = $data.find('a').eq(0);
+				$name = $data.find('h4');
+				$commentContent = $data.find('.comment-content').eq(1);
+				$items = $data.find('.comment-offers');
+				console.debugtf2($icon.html());
+				console.debugtf2($name.html());
+				console.debugtf2($commentContent.html());
+				console.debugtf2($items.html());
+				$('.auction-info').eq(index).parents().eq(3).find('.trade-items').after($('<article class="trade-notes box"></article>').append($name).append($commentContent).append('</br>').append($items));
+				getItemData();
+			}
 		});
-		console.log(link);
+		console.debugtf2(link);
 	});
 }
-socket.emit('timestamp', 'yes');
-socket.on('timestamp', function(timestamp){
-	$('.col-md-4').find('p').first().append(' Last unusual pricelist update: <a href="javascript:alert(\'Last unusual pricelist update: '+timestamp+'\')" style="colour:white">'+timestamp+'</a>');
-});
 
 $.ajax({
     	url: 'http://95.47.140.204:2070/socket.io/1/',
@@ -118,3 +213,13 @@ window.onbeforeunload = function (e) {
 	socket.emit('disconnectreason', 'User unloaded page');
 	socket.disconnect();
 };
+
+$('#settings-dynamic-auctions').click(function(){
+	PCsettings['highestBid'] = $(this).prop('checked');
+	setCookie(PCsettingsCookie, PCsettings, 666);
+})
+$('#settings-input-preview').click(function(){
+	PCsettings['preview'] = $(this).prop('checked');
+	setCookie(PCsettingsCookie, PCsettings, 666);
+})
+setTimeout(getItemData, 2500);
