@@ -1,20 +1,20 @@
 var itemEffect = new RegExp('http://cdn.tf2outpost.com/img/games/440/effects/([0-9]*).png');
-var socket = io.connect('http://95.47.140.204:2070');   
+var socket = io.connect('http://zebry.nl:2070');   
 var pcSend = {};
 var PCsettingsCookie = 'Tf2Price';
 var PCsettings = getCookie(PCsettingsCookie);
 var PCdefaultSettings = {reload:true, reloadTime:1, phishingSensitivity:3, phishing:true};
 var $settingsSubtitle = $('<div class="subtitle">Tf2 Outpost pricer</div>');
 var $settingsBox = $('<div class="double contents"><label><input type="checkbox" name="refreshChkbox" value="1" onclick="setReload();"><span>Refresh item prices dynamically when browsing page.</span></label><label><span id="refreshMinutesSpan">Refresh prices every:</span><input type="textbox" name="refreshMinutes" class="refreshMinutes"><span> minutes</span></label><div class="clear"></div></div><div class="double contents"> <label> <input type="checkbox" name="phishingChkbox" value="1" onclick="setPhishing();"> <span>Automatically flag phishing links.</span> </label> <label> <span id="phishingSensitivitySpan">Phishing sensitivity:</span> <input type="textbox" name="phishingSensitivity" class="phishingSensitivity"> <span> (3 is default)</span> </label> <div class="clear"> </div> </div>');
-var version = '1.7.1';
-var changelog = 'Welcome to update 1.7.1 of Tf2 Outpost pricer\nChangelog 1.7.1:\n - Improved preformace of the class filter (This still only works for cosmetics yet)';
+var version = '1.8.0';
+var changelog = 'Welcome to update 1.8.0 of Tf2 Outpost additions\nChangelog 1.8.0:\n - Added duplication checking';
 var dupedCheck = false;
 var choise_html = 'none';
 var next_page = -1;
 var requests = [];
 var cached_trades = [];
-$.getScript('http://95.47.140.204:8020?script=classes_item_index');
-$('head').append('<link rel="stylesheet" href="http://95.47.140.204:8020/?get=outpostcss" type="text/css" />');
+$.getScript('http://zebry.nl:8020?script=classes_item_index');
+$('head').append('<link rel="stylesheet" href="http://zebry.nl:8020/?get=outpostcss" type="text/css" />');
 console.debugtf2 = function(msg) {
 
 	console.debug('TF2outpost additions debug: '+msg);
@@ -25,7 +25,7 @@ if (version != getCookie('version')) {
 	alert(changelog);
 	setCookie('version', version, 666);
 }
-
+$('.solid_bottom.contents.wysiwyg').remove();
 $('.notes_edit').click(function() {
 	/*setTimeout(function() {*/$('textarea[name="notes"]').parent().parent().parent().prepend('<div class="title" style= "background: #141312; color: #766d68; font-weight: bold; font-size: 10.5pt; border-top: 1px solid #2f2c2a; border-bottom: 1px solid #252220; background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #1f1d1b), color-stop(100%, #141312)); background: -webkit-linear-gradient(#1f1d1b,#141312); background: -moz-linear-gradient(#1f1d1b,#141312); background: -o-linear-gradient(#1f1d1b,#141312); background: linear-gradient(#1f1d1b,#141312); -webkit-border-radius: 6px 6px 0 0; -moz-border-radius: 6px 6px 0 0; -ms-border-radius: 6px 6px 0 0; -o-border-radius: 6px 6px 0 0; border-radius: 6px 6px 0 0; -webkit-box-shadow: 0 2px 3px rgba(0,0,0,0.1); -moz-box-shadow: 0 2px 3px rgba(0,0,0,0.1); box-shadow: 0 2px 3px rgba(0,0,0,0.1); text-shadow: 0 -1px 0 rgba(0,0,0,0.4);"> <ul class="details"><li class="additions_li_left additions_username" style="padding-right:16px;padding-left:16px"><a href="/user/'+aries.user.id+'" style="display:table-cell; vertical-align: middle;"><strong>'+aries.user.nickname+'</strong> <span class="additions_username_details">wants to say...</span></a></li> </ul><ul class="additions_ul"><li class="additions_li_right"> <a data-tipsy="color" href= "javascript:bb(\'color\',%200,%20\'textarea[name=\\\'notes\\\']\')"> <div class="icon_bcolor"></div></a> </li> <li class="additions_li_right"> <a href= "javascript:bb(\'strike\',%200,%20\'textarea[name=\\\'notes\\\']\')"> <div class="icon_strike"></div> </a></li> <li class="additions_li_right"> <a href= "javascript:bb(\'underline\',%200,%20\'textarea[name=\\\'notes\\\']\')"> <div class="icon_underline"></div> </a></li> <li class="additions_li_right"> <a href= "javascript:bb(\'italic\',%200,%20\'textarea[name=\\\'notes\\\']\')"> <div class="icon_italic"></div> </a></li> <li class="additions_li_right"> <a href= "javascript:bb(\'bold\',%200,%20\'textarea[name=\\\'notes\\\']\')"> <div class="icon_bold"></div> </a></li> </ul> <div class="clear"></div> </div>');
 });
@@ -281,7 +281,7 @@ function bb(type, index, $this) {
 }
 // Check if server is up
 $.ajax({
-	url: 'http://95.47.140.204:2070/socket.io/1/',
+	url: 'http://zebry.nl:2070/socket.io/1/',
 	success: function() {
 		setCookie('serverDownMsg', 'false', 666);
 	},
@@ -446,3 +446,52 @@ function onlyClass(class_name) {
   	};
 	worker.postMessage(JSON.stringify({'cached_trades': cached_trades, 'class_name':class_name}));
 }
+
+
+function checkDuped(body) {
+	console.debugtf2('Checking item for dupes');
+	ids = [];
+	duped = false;
+	$(body).find('.item_summary').each(function() {
+		var id = $(this).attr('data-id')
+		if (ids.indexOf(id) > -1) {
+			duped = true;
+		}
+		ids.push(id)
+	});
+	if (duped) {
+		console.debugtf2('Found item dupe!');
+		body = body.replace('<div class="title">History</div>', '<div class="title">History <span class="phishing_url">This item appears to be duped</span></div>');
+	}
+	return body.replace('<div class="title">History</div>', '<div class="title">History <a target="_blank" style="float:right;" href="http://backpack.tf/item/'+/<div class\=\"row contents\"><div>Original ID\:<\/div><div class\=\"white\">([0-9]*)<\/div><\/div>/g.exec(body)[1]+'">Backpack.tf history</a></div>');
+}
+$('.item_summary').off('click').on('click', item_summary_hook);
+
+// Add a hook into aires, Srry for copying your code sneeza
+// copy from aires with dupe check inside
+function item_summary_hook () {
+	var a = $(this),
+		c = a.parent(),
+		b = $('<div class="loading"><span class="icon_loading"></span></div>'),
+		e = new Panel(b, 200),
+		f, h = c.data("hash");
+		h ? (h = h.split(","), b = c.data("id").toString(), c = h[0], f = h[1], a = h[2]) : (c = a.data("gameid"), b = a.data("id").toString(), f = a.data("index"), a = a.data("quality"));
+	aries.api.panel({
+		action: "item.summary",
+		hash: aries.user.hash,
+		gameid: c,
+		itemid: b,
+		index: f,
+		quality: a
+	}, function (a) {
+		e.set_id("item_summary");
+		e.set_html(checkDuped(a.body));
+		a.ad && e.set_ad(a.ad)
+	}, function (a) {
+		e.set_html(a)
+	});
+	return !1
+}
+
+// fixing other peoples work:
+document.onerror = function(err) { console.debugtf2('Catched error: '+err) }

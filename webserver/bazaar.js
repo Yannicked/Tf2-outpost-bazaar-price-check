@@ -1,4 +1,4 @@
-var socket = io.connect('ws://95.47.140.204:2070');
+var socket = io.connect('ws://zebry.nl:2070');
 var steamID = $('.btn.btn-primary.user-btn.hidden-xs').attr('href').replace('/profiles/', '');
 var version = '1.5.0.1';
 var changelog = 'Welcome to bazaar.tf unusual pricer version '+version+'\nChangelog 1.5.0.1:\n - Fixed server issues';
@@ -195,7 +195,7 @@ function getHighestBid() {
 }
 
 $.ajax({
-    	url: 'http://95.47.140.204:2070/socket.io/1/',
+    	url: 'http://zebry.nl:2070/socket.io/1/',
 	success: function() {
        	setCookie('serverDownMsg', 'false', 666);
 	},
