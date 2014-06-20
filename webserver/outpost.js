@@ -337,7 +337,7 @@ function fake(text1, text2) {
 	return distance>=1 && distance <= PCsettings.phishingSensitivity;
 }
 
-var trusted_links = ['steamcommunity.com', 'tf2outpost.com', 'dotaoutpost.com', 'bazaar.tf', 'steampowered.com', 'backpack.tf'];
+var trusted_links = ['steamcommunity.com', 'tf2outpost.com', 'dotaoutpost.com', 'bazaar.tf', 'steampowered.com', 'backpack.tf', 'esoutpost.com'];
 
 function fakeLink(link) {
 	if (!(link.split("."))) {

@@ -72,4 +72,4 @@ setInterval(function () {
 		if (err) throw err;
 		classes_item_index = data;
 	});
-});
+}, 10000);
